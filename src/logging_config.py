@@ -171,7 +171,7 @@ def setup_logging(logging_config: LoggingConfig) -> None:
         'version': 1,
         'disable_existing_loggers': False,
         'formatters': {
-            'standard': {
+            'main': {
                 '()': SanitizingFormatter,
                 'format': logging_config.format,
                 'datefmt': '%Y-%m-%d %H:%M:%S'
@@ -186,7 +186,7 @@ def setup_logging(logging_config: LoggingConfig) -> None:
             'console': {
                 'class': 'logging.StreamHandler',
                 'level': logging_config.level,
-                'formatter': 'standard',
+                'formatter': 'main',
                 'stream': sys.stdout
             },
             'error_console': {

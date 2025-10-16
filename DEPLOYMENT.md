@@ -135,8 +135,6 @@ scrape_configs:
 ### Available Endpoints
 
 - **Metrics:** `GET /metrics` - Prometheus metrics endpoint
-- **Health (Live):** `GET /health/live` - Liveness probe
-- **Health (Ready):** `GET /health/ready` - Readiness probe
 
 ### Sample Metrics
 
@@ -159,12 +157,6 @@ afs_file_quantity_used{volume_id="80433778-429e-11ef-bc97-4eca24dcdba9",zone="cn
 ### Health Checks
 
 ```bash
-# Check if service is running
-curl http://localhost:8080/health/live
-
-# Check if service is ready
-curl http://localhost:8080/health/ready
-
 # Get metrics
 curl http://localhost:8080/metrics
 ```

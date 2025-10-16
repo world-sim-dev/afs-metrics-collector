@@ -29,6 +29,7 @@ show_help() {
     echo "  -r, --registry REG    镜像仓库地址"
     echo "  -p, --push            构建后推送到仓库"
     echo "  --no-cache            不使用缓存构建"
+    echo "  --test-sources        测试 APT 源配置"
     echo "  -h, --help            显示此帮助信息"
     echo ""
     echo "示例:"
@@ -61,6 +62,11 @@ while [[ $# -gt 0 ]]; do
             NO_CACHE=true
             shift
             ;;
+        --test-sources)
+            echo -e "${BLUE}测试 APT 源配置...${NC}"
+            ./test-docker-sources.sh
+            exit $?
+            ;;
         -h|--help)
             show_help
             exit 0
@@ -83,6 +89,7 @@ fi
 echo -e "${BLUE}=== AFS Metrics Collector Docker 构建 ===${NC}"
 echo -e "${YELLOW}镜像名称:${NC} $FULL_IMAGE_NAME"
 echo -e "${YELLOW}构建时间:${NC} $(date)"
+echo -e "${YELLOW}镜像源优化:${NC} 使用阿里云 APT 和 PyPI 镜像源"
 echo ""
 
 # 检查 Docker 是否可用

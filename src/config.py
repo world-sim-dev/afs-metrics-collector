@@ -66,14 +66,14 @@ class Config:
         self.collection: CollectionConfig = CollectionConfig()
         self.logging: LoggingConfig = LoggingConfig()
         
-        # Load configuration from environment variables first
-        self.load_from_env()
-        
-        # Override with config file if provided
+        # Load configuration from file first (if exists)
         if config_file:
             self.load_from_file(config_file)
         elif os.path.exists("config.yaml"):
             self.load_from_file("config.yaml")
+        
+        # Override with environment variables (higher priority)
+        self.load_from_env()
     
     def load_from_env(self) -> None:
         """Load configuration from environment variables."""
@@ -114,9 +114,17 @@ class Config:
         )
         
         # Logging configuration
+        log_format = os.getenv("LOG_FORMAT", "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        
+        # Handle special format keywords
+        if log_format.lower() == "json":
+            log_format = '{"timestamp": "%(asctime)s", "logger": "%(name)s", "level": "%(levelname)s", "message": "%(message)s"}'
+        elif log_format.lower() == "simple":
+            log_format = "%(levelname)s - %(message)s"
+        
         self.logging = LoggingConfig(
             level=os.getenv("LOG_LEVEL", "INFO"),
-            format=os.getenv("LOG_FORMAT", "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+            format=log_format
         )
     
     def load_from_file(self, config_path: str) -> None:

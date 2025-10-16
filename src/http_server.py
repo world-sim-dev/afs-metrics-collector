@@ -24,8 +24,6 @@ class MetricsServer:
     
     This server provides:
     - /metrics endpoint for Prometheus scraping
-    - /health/ready endpoint for readiness checks
-    - /health/live endpoint for liveness probes
     """
     
     def __init__(self, config: Config, metrics_handler: MetricsHandler):
@@ -61,25 +59,6 @@ class MetricsServer:
             Returns real-time AFS storage metrics in Prometheus format.
             """
             return self._handle_metrics_request()
-        
-        @self.app.route('/health/ready', methods=['GET'])
-        def readiness_endpoint():
-            """
-            Readiness probe endpoint.
-            
-            Checks if the service is ready to serve requests by validating
-            configuration and testing AFS API connectivity.
-            """
-            return self._handle_readiness_check()
-        
-        @self.app.route('/health/live', methods=['GET'])
-        def liveness_endpoint():
-            """
-            Liveness probe endpoint.
-            
-            Simple health check to verify the service is running.
-            """
-            return self._handle_liveness_check()
         
         @self.app.errorhandler(RequestTimeout)
         def handle_timeout(error):
@@ -169,56 +148,7 @@ class MetricsServer:
     
 
     
-    def _handle_readiness_check(self) -> Response:
-        """
-        Handle readiness probe requests.
-        
-        Checks configuration validity and AFS API connectivity.
-        
-        Returns:
-            JSON response indicating readiness status
-        """
-        try:
-            with log_operation(self.logger, "readiness check", level='DEBUG'):
-                # Validate configuration
-                self.config.validate()
-                self.logger.debug("Configuration validation passed")
-                
-                # Test AFS API connectivity
-                if not self.metrics_handler.afs_client.test_connection():
-                    self.logger.warning("AFS API connectivity test failed")
-                    return jsonify({
-                        'status': 'not ready',
-                        'message': 'AFS API connectivity test failed'
-                    }), 503
-                
-                self.logger.debug("AFS API connectivity test passed")
-                return jsonify({
-                    'status': 'ready',
-                    'message': 'Service is ready to serve requests'
-                }), 200
-                
-        except Exception as e:
-            error_msg = str(e)[:200]
-            self.logger.error(f"Readiness check failed: {error_msg}")
-            return jsonify({
-                'status': 'not ready',
-                'message': f'Readiness check failed: {error_msg}'
-            }), 503
-    
-    def _handle_liveness_check(self) -> Response:
-        """
-        Handle liveness probe requests.
-        
-        Simple check to verify the service is running.
-        
-        Returns:
-            JSON response indicating liveness status
-        """
-        return jsonify({
-            'status': 'alive',
-            'message': 'Service is running'
-        }), 200
+
     
     def start_server(self, debug: bool = False) -> None:
         """

@@ -41,6 +41,7 @@ ENV/
 .pytest_cache/
 .coverage
 htmlcov/
+requirements-dev.txt
 .tox/
 .nox/
 tests/
@@ -76,3 +77,19 @@ Dockerfile.*
 
 # Kiro 相关
 .kiro/
+
+# 验证脚本（不需要在容器中）
+validate-config.py
+test-docker-sources.sh
+test-logging.py
+
+# Kubernetes 部署文件（不需要在容器中）
+k8s-*.yaml
+kustomization.yaml
+deploy-k8s.sh
+
+# 开发工具配置
+.flake8
+.mypy.ini
+pyproject.toml
+setup.cfg

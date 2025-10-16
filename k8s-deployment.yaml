@@ -1,0 +1,229 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: afs-metrics
+  labels:
+    name: afs-metrics
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: afs-credentials
+  namespace: afs-metrics
+type: Opaque
+stringData:
+  # AFS API 凭据 - 请替换为实际值
+  AFS_ACCESS_KEY: "YOUR_ACCESS_KEY_HERE"
+  AFS_SECRET_KEY: "YOUR_SECRET_KEY_HERE"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: afs-config
+  namespace: afs-metrics
+data:
+  # AFS API 配置
+  AFS_BASE_URL: "https://afs.cn-sh-01.sensecoreapi.cn"
+  
+  # 监控的 AFS 卷配置 (JSON 格式)
+  AFS_VOLUMES: |
+    [
+      {
+        "volume_id": "YOUR_VOLUME_ID_HERE",
+        "zone": "cn-sh-01e"
+      }
+    ]
+  
+  # 服务器配置
+  SERVER_HOST: "0.0.0.0"
+  SERVER_PORT: "8080"
+  REQUEST_TIMEOUT: "30"
+  
+  # 数据收集配置
+  COLLECTION_TIMEOUT: "25"
+  COLLECTION_MAX_RETRIES: "3"
+  COLLECTION_RETRY_DELAY: "2"
+  COLLECTION_CACHE_DURATION: "30"
+  
+  # 日志配置
+  LOG_LEVEL: "INFO"
+  LOG_FORMAT: "json"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: afs-metrics-collector
+  namespace: afs-metrics
+  labels:
+    app: afs-metrics-collector
+    version: v1.0.0
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: afs-metrics-collector
+  template:
+    metadata:
+      labels:
+        app: afs-metrics-collector
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+      - name: afs-metrics-collector
+        image: sandai-registry-vpc.cn-beijing.cr.aliyuncs.com/mirrors/afs-metrics-collector:1016
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        env:
+        # AFS API 凭据 (从 Secret 获取)
+        - name: AFS_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: afs-credentials
+              key: AFS_ACCESS_KEY
+        - name: AFS_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: afs-credentials
+              key: AFS_SECRET_KEY
+        
+        # 其他配置 (从 ConfigMap 获取)
+        - name: AFS_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: afs-config
+              key: AFS_BASE_URL
+        - name: AFS_VOLUMES
+          valueFrom:
+            configMapKeyRef:
+              name: afs-config
+              key: AFS_VOLUMES
+        - name: SERVER_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: afs-config
+              key: SERVER_HOST
+        - name: SERVER_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: afs-config
+              key: SERVER_PORT
+        - name: REQUEST_TIMEOUT
+          valueFrom:
+            configMapKeyRef:
+              name: afs-config
+              key: REQUEST_TIMEOUT
+        - name: COLLECTION_TIMEOUT
+          valueFrom:
+            configMapKeyRef:
+              name: afs-config
+              key: COLLECTION_TIMEOUT
+        - name: COLLECTION_MAX_RETRIES
+          valueFrom:
+            configMapKeyRef:
+              name: afs-config
+              key: COLLECTION_MAX_RETRIES
+        - name: COLLECTION_RETRY_DELAY
+          valueFrom:
+            configMapKeyRef:
+              name: afs-config
+              key: COLLECTION_RETRY_DELAY
+        - name: COLLECTION_CACHE_DURATION
+          valueFrom:
+            configMapKeyRef:
+              name: afs-config
+              key: COLLECTION_CACHE_DURATION
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: afs-config
+              key: LOG_LEVEL
+        - name: LOG_FORMAT
+          valueFrom:
+            configMapKeyRef:
+              name: afs-config
+              key: LOG_FORMAT
+        
+        # 资源限制
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+        # 健康检查 - 使用 TCP 端口检测
+        livenessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        # 安全上下文
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        
+        # 挂载临时目录
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: logs
+          mountPath: /app/logs
+      
+      # 卷定义
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: logs
+        emptyDir: {}
+      
+      # 重启策略
+      restartPolicy: Always
+      
+      # DNS 策略
+      dnsPolicy: ClusterFirst
+      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: afs-metrics-service
+  namespace: afs-metrics
+  labels:
+    app: afs-metrics-collector
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+    protocol: TCP
+  selector:
+    app: afs-metrics-collector
