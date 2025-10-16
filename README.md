@@ -18,6 +18,8 @@ docker run -d --name afs-metrics -p 8080:8080 \
   -e AFS_ACCESS_KEY=your_access_key \
   -e AFS_SECRET_KEY=your_secret_key \
   -e AFS_BASE_URL=https://afs.cn-sh-01.sensecoreapi.cn \
+  -e AFS_VOLUMES='[{"volume_id": "your_volume_id", "zone": "cn-sh-01e"}]' \
+  -e LOG_FORMAT=json \
   afs-metrics-collector
 
 # 查看日志
@@ -107,6 +109,21 @@ cp config.yaml.example config.yaml
 # 复制并编辑环境变量文件
 cp .env.example .env
 ```
+
+主要环境变量：
+- `AFS_ACCESS_KEY` - AFS API 访问密钥 (必填)
+- `AFS_SECRET_KEY` - AFS API 密钥 (必填)
+- `AFS_BASE_URL` - AFS API 基础 URL
+- `AFS_VOLUMES` - AFS 卷配置 (JSON 格式，必填)
+  ```bash
+  # 单个卷
+  AFS_VOLUMES='[{"volume_id": "vol-123", "zone": "cn-sh-01e"}]'
+  
+  # 多个卷
+  AFS_VOLUMES='[{"volume_id": "vol-123", "zone": "cn-sh-01e"}, {"volume_id": "vol-456", "zone": "cn-sh-01f"}]'
+  ```
+- `LOG_FORMAT` - 日志格式 (`json`, `simple`, 或标准格式字符串)
+- `LOG_LEVEL` - 日志级别 (`DEBUG`, `INFO`, `WARNING`, `ERROR`)
 
 环境变量优先级高于配置文件设置。
 

@@ -188,18 +188,12 @@ def setup_logging(logging_config: LoggingConfig) -> None:
                 'level': logging_config.level,
                 'formatter': 'main',
                 'stream': sys.stdout
-            },
-            'error_console': {
-                'class': 'logging.StreamHandler',
-                'level': 'ERROR',
-                'formatter': 'detailed',
-                'stream': sys.stderr
             }
         },
         'loggers': {
             'src': {
                 'level': logging_config.level,
-                'handlers': ['console', 'error_console'],
+                'handlers': ['console'],
                 'propagate': False
             },
             'requests': {
@@ -215,7 +209,7 @@ def setup_logging(logging_config: LoggingConfig) -> None:
         },
         'root': {
             'level': logging_config.level,
-            'handlers': ['console', 'error_console']
+            'handlers': ['console']
         }
     }
     

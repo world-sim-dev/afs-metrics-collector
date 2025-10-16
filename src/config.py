@@ -83,13 +83,28 @@ class Config:
         base_url = os.getenv("AFS_BASE_URL", "https://afs.cn-sh-01.sensecoreapi.cn")
         
         if access_key and secret_key:
-            # Parse volumes from environment (simplified - single volume for now)
-            volume_id = os.getenv("AFS_VOLUME_ID")
-            zone = os.getenv("AFS_ZONE")
-            
             volumes = []
-            if volume_id and zone:
-                volumes.append(VolumeConfig(volume_id=volume_id, zone=zone))
+            
+            # Try to parse volumes from JSON format first (Kubernetes style)
+            volumes_json = os.getenv("AFS_VOLUMES")
+            if volumes_json:
+                try:
+                    import json
+                    volumes_data = json.loads(volumes_json)
+                    for volume_data in volumes_data:
+                        volumes.append(VolumeConfig(
+                            volume_id=volume_data["volume_id"],
+                            zone=volume_data["zone"]
+                        ))
+                except (json.JSONDecodeError, KeyError, TypeError) as e:
+                    raise ConfigurationError(f"Invalid AFS_VOLUMES format: {e}")
+            
+            # Fallback to single volume format
+            if not volumes:
+                volume_id = os.getenv("AFS_VOLUME_ID")
+                zone = os.getenv("AFS_ZONE")
+                if volume_id and zone:
+                    volumes.append(VolumeConfig(volume_id=volume_id, zone=zone))
             
             self.afs = AFSConfig(
                 access_key=access_key,
