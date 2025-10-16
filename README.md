@@ -26,7 +26,9 @@ docker run -d --name afs-metrics -p 8080:8080 \
 docker logs -f afs-metrics
 ```
 
-> **优化说明**: Dockerfile 已配置使用阿里云的 APT 和 PyPI 镜像源，在中国大陆环境下可显著提高构建速度。
+> **说明**: 
+> - Dockerfile 已配置使用阿里云的 APT 和 PyPI 镜像源，在中国大陆环境下可显著提高构建速度
+> - 容器以 root 用户运行，便于文件系统访问和调试
 
 ### 2. 使用 Kubernetes
 
@@ -42,6 +44,9 @@ kubectl apply -f k8s-deployment.yaml
 
 # 查看状态
 ./deploy-k8s.sh --status
+
+# 验证 root 用户配置
+./deploy-k8s.sh --verify
 
 # 访问服务
 kubectl port-forward -n afs-metrics service/afs-metrics-service 8080:8080

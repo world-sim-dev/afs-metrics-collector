@@ -212,18 +212,33 @@ data:
    echo $AFS_VOLUMES | python -m json.tool
    ```
 
+## 安全说明
+
+### 用户权限
+- **Docker**: 容器以 root 用户运行，便于文件系统访问和调试
+- **Kubernetes**: Pod 以 root 用户运行 (runAsUser: 0)
+- **本地运行**: 使用当前用户权限
+
+### 网络安全
+- 容器只暴露必要的端口 (8080)
+- 使用 TCP 端口检测进行健康检查
+- 支持 Kubernetes NetworkPolicy 限制网络访问
+
 ## 最佳实践
 
 1. **生产环境**
    - 使用 `LOG_FORMAT=json` 便于日志分析
    - 设置适当的资源限制
    - 使用 Secret 管理敏感信息
+   - 配置网络策略限制访问
 
 2. **开发环境**
    - 使用 `LOG_LEVEL=DEBUG` 获取详细信息
    - 使用配置文件便于调试
+   - 可以使用非特权用户运行
 
 3. **监控**
    - 定期检查 `/metrics` 端点
    - 监控容器健康状态
    - 设置适当的告警规则
+   - 监控资源使用情况

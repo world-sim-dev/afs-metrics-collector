@@ -83,6 +83,7 @@ validate-config.py
 test-docker-sources.sh
 test-logging.py
 test-complete.py
+test-root-user.py
 
 # Kubernetes 部署文件（不需要在容器中）
 k8s-*.yaml

@@ -78,10 +78,9 @@ spec:
         prometheus.io/path: "/metrics"
     spec:
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 0
       containers:
       - name: afs-metrics-collector
         image: sandai-registry-vpc.cn-beijing.cr.aliyuncs.com/mirrors/afs-metrics-collector:1016
@@ -178,13 +177,10 @@ spec:
           timeoutSeconds: 5
           failureThreshold: 3
         
-        # 安全上下文
+        # 安全上下文 - 使用 root 用户
         securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-            - ALL
+          runAsUser: 0
+          runAsGroup: 0
         
         # 挂载临时目录
         volumeMounts:

@@ -38,12 +38,14 @@ show_help() {
     echo "  --simple               使用简化部署文件"
     echo "  --delete               删除部署"
     echo "  --status               查看部署状态"
+    echo "  --verify               验证 root 用户配置"
     echo "  -h, --help             显示此帮助信息"
     echo ""
     echo "示例:"
     echo "  $0 -k ACCESS_KEY -s SECRET_KEY -v VOLUME_ID"
     echo "  $0 --simple -k ACCESS_KEY -s SECRET_KEY -v VOLUME_ID"
     echo "  $0 --status"
+    echo "  $0 --verify"
     echo "  $0 --delete"
 }
 
@@ -107,6 +109,11 @@ while [[ $# -gt 0 ]]; do
             echo -e "${YELLOW}服务状态:${NC}"
             kubectl get service -n "$NAMESPACE" 2>/dev/null || echo "无服务"
             exit 0
+            ;;
+        --verify)
+            echo -e "${BLUE}验证 root 用户配置...${NC}"
+            ./verify-k8s-root.sh
+            exit $?
             ;;
         -h|--help)
             show_help

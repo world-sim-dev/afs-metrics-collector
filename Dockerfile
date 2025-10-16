@@ -31,21 +31,14 @@ RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ && \
     pip config set global.trusted-host mirrors.aliyun.com && \
     pip install --no-cache-dir -r requirements.txt
 
-# 创建非 root 用户
-RUN groupadd -r afs && useradd -r -g afs -d /app -s /bin/bash afs
-
 # 复制应用代码
-COPY --chown=afs:afs src/ ./src/
-COPY --chown=afs:afs server.py ./
-COPY --chown=afs:afs config.yaml.example ./config.yaml.example
-COPY --chown=afs:afs .env.example ./.env.example
+COPY src/ ./src/
+COPY server.py ./
+COPY config.yaml.example ./config.yaml.example
+COPY .env.example ./.env.example
 
 # 创建必要的目录
-RUN mkdir -p /app/logs /app/config && \
-    chown -R afs:afs /app
-
-# 切换到非 root 用户
-USER afs
+RUN mkdir -p /app/logs /app/config
 
 # 暴露端口
 EXPOSE 8080
