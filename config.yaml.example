@@ -1,0 +1,22 @@
+afs:
+  access_key: "YOUR_ACCESS_KEY"
+  secret_key: "YOUR_SECRET_KEY"
+  base_url: "https://afs.cn-sh-01.sensecoreapi.cn"
+  volumes:
+    - volume_id: "01987d8c-2d13-78cc-ba7b-1ad9beb7e552"
+      zone: "cn-sh-01e"
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  request_timeout: 30
+
+collection:
+  max_retries: 3
+  retry_delay: 2
+  timeout_seconds: 25
+  cache_duration: 30
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

@@ -1,0 +1,78 @@
+# Git 相关
+.git
+.gitignore
+
+# Python 相关
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 虚拟环境
+venv/
+env/
+ENV/
+
+# IDE 相关
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 测试相关
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+tests/
+performance_reports/
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# 文档
+docs/
+*.md
+!README.md
+
+# 配置文件（保留示例）
+config.yaml
+.env
+!config.yaml.example
+!.env.example
+
+# 部署相关
+Dockerfile.*
+.dockerignore
+
+# 构建脚本
+*.sh
+
+# Kiro 相关
+.kiro/
